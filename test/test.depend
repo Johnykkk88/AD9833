@@ -8,17 +8,29 @@
 
 1644039181 /home/jetson/Code_Blocks/test/gpio.h
 
-1644583835 source:/home/jetson/Code_Blocks/test/main.c
+1644661788 source:/home/jetson/Code_Blocks/test/main.c
 	<stdio.h>
 	<stdlib.h>
 	"gpio.h"
 	"AD9833.h"
 
-1644583684 source:/home/jetson/Code_Blocks/test/AD9833.c
+1644662066 source:/home/jetson/Code_Blocks/test/AD9833.c
 	"AD9833.h"
 
-1644587757 /home/jetson/Code_Blocks/test/AD9833.h
+1644662055 /home/jetson/Code_Blocks/test/AD9833.h
 	<math.h>
 	<stdint.h>
 	"gpio.h"
+
+1644651604 source:/home/jetson/Code_Blocks/test/spidev_fdx.c
+	<stdio.h>
+	<unistd.h>
+	<stdlib.h>
+	<fcntl.h>
+	<string.h>
+	<sys/ioctl.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<linux/types.h>
+	<linux/spi/spidev.h>
 

@@ -6,12 +6,13 @@
 *************************************************************************************/
 #ifndef _AD_9833_H
 #define _AD_9833_H
+
 #include <math.h>
 #include <stdint.h>
 #include "gpio.h"
 
 // --------------------------------- Defines -------------------------
-#define AD9833_SPI_PORT
+#define AD9833_SPI_PORT MOSI
 #define AD9833DATA PIN_19     // SPI DATA PIN
 #define AD9833SCK PIN_23      // SPI Clock PIN
 #define AD9833SS PIN_24       // SPI Chip Select
@@ -48,12 +49,19 @@
 typedef enum {
         wave_sine,
         wave_square,
-        wave_triangle};
+        wave_triangle
 }WaveDef;
-  // Wave Selection Enum
 
 // ------------------ Functions  ---------------------
-void AD9833_SetWave(uint16_t Wave);                      // Sets Output Wave Type
-void AD9833_SetWaveData(float Frequency,float Phase);    // Sets Wave Frequency & Phase
-void AD9833_Init(uint16_t Wave,float FRQ,float Phase);   // Initializing AD9833
+void AD9833_Select(void);
+void AD9833_Unselect(void);
+void AD9833_Init(WaveDef Wave, uint32_t freq, uint16_t phase_deg);
+void AD9833_OutputEnable(uint8_t output_state);
+void AD9833_WriteCfgReg(void);
+void AD9833_WriteRegister(uint16_t data);
+void AD9833_SetWaveform(WaveDef Wave);
+void AD9833_SetFrequency(uint32_t freq);
+void AD9833_SetPhase(uint16_t phase_deg);
+void AD9833_SleepMode(uint8_t mode);
+
 #endif

@@ -12,14 +12,6 @@
         uint8_t _phase_source = 0;
         uint8_t _reset_state = 0;
 
-        //Remake
-        uint16_t FRQLW = 0;    // MSB of Frequency Tuning Word
-        uint16_t FRQHW = 0;    // LSB of Frequency Tuning Word
-        uint32_t phaseVal=0;  // Phase Tuning Value
-        uint8_t WKNOWN=0;      // Flag Variable
-
-
-
 // -------------------------------- Functions --------------------------------
 // -------------------------------- Chip Select --------------------------------
 void AD9833_Select(void)
@@ -36,7 +28,7 @@ void AD9833_Unselect(void)
         gpio_write(AD9833SS, HIGH);
 }
 // -------------------------------- Init --------------------------------
-void AD9833_Init(WaveDef wave, uint32_t freq, uint16_t phase_deg)
+void AD9833_Init(WaveDef Wave, uint32_t freq, uint16_t phase_deg)
 {
         AD9833_OutputEnable(0);
         AD9833_SetWaveform(Wave);
@@ -68,8 +60,8 @@ void AD9833_WriteCfgReg(void)
 void AD9833_WriteRegister(uint16_t data)
 {
         AD9833_Select();
-        uint8_t LByte = data & 0xff;
-        uint8_t LByte = (data>>8) & 0xff;
+        //uint8_t LByte = data & 0xff;
+        //uint8_t LByte = (data>>8) & 0xff;
 
         //Rewrite!
 
@@ -87,67 +79,44 @@ void AD9833_WriteRegister(uint16_t data)
 	ASM_NOP();
 	*/
 }
-// ------------------------------------------------ Sets Output Wave Type
-void AD9833_SetWave(uint16_t Wave){
-  switch(Wave){
-  case 0:
-  gpio_write(AD9833SS, LOW);
-    writeSPI(0x2000); // Value for Sinusoidal Wave
-     gpio_write(AD9833SS, HIGH);
-    WKNOWN=0;
-    break;
-  case 1:
-     gpio_write(AD9833SS, LOW);
-    writeSPI(0x2028); // Value for Square Wave
-    gpio_write(AD9833SS, HIGH);
-    WKNOWN=1;
-    break;
-  case 2:
-        gpio_write(AD9833SS, LOW);
-    writeSPI(0x2002); // Value for Triangle Wave
-    gpio_write(AD9833SS, HIGH);
-    WKNOWN=2;
-    break;
-  default:
-    break;
-  }
+// -------------------------------- Set Waveform --------------------------------
+void AD9833_SetWaveform(WaveDef Wave)
+{
+        if (Wave == wave_sine)           _waveform = WAVEFORM_SINE;
+        else if (Wave == wave_square)    _waveform = WAVEFORM_SQUARE;
+        else if (Wave == wave_triangle)  _waveform = WAVEFORM_TRIANGLE;
+        AD9833_WriteCfgReg();
 }
+// -------------------------------- Set Frequency --------------------------------
+void AD9833_SetFrequency(uint32_t freq)
+{
+        if (freq > (FMCLK >> 1)) freq = FMCLK >> 1;//bitwise FMCLK/2
+        else if (freq < 0) freq = 0;
 
-// ------------------------------------------------ Sets Wave Frequency & Phase (In Degree) In PHASE0 & FREQ0 Registers
-void AD9833_SetWaveData(float Frequency,float Phase){
-ASM_NOP();
- // ---------- Tuning Word for Phase ( 0 - 360 Degree )
- if(Phase<0)Phase=0; // Changing Phase Value to Positive
- if(Phase>360)Phase=360; // Maximum value For Phase (In Degree)
- phaseVal  = ((int)(Phase*(4096/360)))|0XC000;  // 4096/360 = 11.37 change per Degree for Register And using 0xC000 which is Phase 0 Register Address
+        uint32_t freq_reg = (float)freq * (float)((1<<28)/FMCLK);
 
- // ---------- Tuning word for Frequency
-long freq=0;
-freq=(int)(((Frequency*pow(2,28))/FMCLK)+1); // Tuning Word
-FRQHW=(int)((freq & 0xFFFC000) >> 14); // FREQ MSB
-FRQLW=(int)(freq & 0x3FFF);  // FREQ LSB
-FRQLW |= 0x4000;
-FRQHW |= 0x4000;
- // ------------------------------------------------ Writing DATA
- gpio_write(AD9833DATA, HIGH);
- gpio_write(AD9833SCK, HIGH);
- gpio_write(AD9833SS, HIGH);
- gpio_write(AD9833SS, LOW); //low = selected
-	ASM_NOP();
-	writeSPI(0x2100); // enable 16bit words and set reset bit
-	writeSPI(FRQLW);
-	writeSPI(FRQHW);
-        writeSPI(phaseVal);
-	writeSPI(0x2000); // clear reset bit
-	ASM_NOP();
-	gpio_write(AD9833SS, HIGH); //high = deselected
-AD9833_SetWave(WKNOWN);
-ASM_NOP();
-return;
+        uint16_t LSB = FREQ0_REG | (freq_reg & 0x3FFF);
+        uint16_t MSB = FREQ0_REG | (freq_reg >> 14);
+
+        AD9833_WriteCfgReg();
+        AD9833_WriteRegister(LSB);
+        AD9833_WriteRegister(MSB);
 }
+// -------------------------------- Set Phase --------------------------------
+void AD9833_SetPhase(uint16_t phase_deg)
+{
+        if (phase_deg < 0) phase_deg = 0;
+        else if (phase_deg > 360) phase_deg %= 360;
 
-
-
+        uint16_t phase_val = ((uint16_t)(phase_deg * BITS_PER_DEG)) & 0xFFF;
+        AD9833_WriteRegister(PHASE0_REG | phase_val);
+}
+// -------------------------------- Sleep Mode --------------------------------
+void AD9833_SleepMode(uint8_t mode)
+{
+       _sleep_mode = mode;
+       AD9833_WriteCfgReg();
+}
 
 
 
