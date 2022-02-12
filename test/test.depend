@@ -1,0 +1,24 @@
+# depslib dependency file v1.0
+1644039181 source:/home/jetson/Code_Blocks/test/gpio.c
+	<fcntl.h>
+	<stdio.h>
+	<string.h>
+	<unistd.h>
+	"gpio.h"
+
+1644039181 /home/jetson/Code_Blocks/test/gpio.h
+
+1644583835 source:/home/jetson/Code_Blocks/test/main.c
+	<stdio.h>
+	<stdlib.h>
+	"gpio.h"
+	"AD9833.h"
+
+1644583684 source:/home/jetson/Code_Blocks/test/AD9833.c
+	"AD9833.h"
+
+1644587757 /home/jetson/Code_Blocks/test/AD9833.h
+	<math.h>
+	<stdint.h>
+	"gpio.h"
+
